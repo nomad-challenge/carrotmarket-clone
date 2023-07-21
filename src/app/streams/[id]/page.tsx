@@ -1,4 +1,4 @@
-const LiveDetail = () => {
+const StreamDetail = () => {
   return (
     <div className="space-y-4 px-4 py-10">
       <div className="aspect-video w-full rounded-md bg-slate-300 shadow-sm"></div>
@@ -118,4 +118,4 @@ const LiveDetail = () => {
   );
 };
 
-export default LiveDetail;
+export default StreamDetail;
