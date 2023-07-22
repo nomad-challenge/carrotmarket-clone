@@ -1,6 +1,7 @@
 "use client";
 import Button from "@/components/button";
 import Input from "@/components/input";
+import useMutation from "@/libs/client/useMutation";
 import { cls } from "@/libs/client/utils";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -10,6 +11,7 @@ interface IEnterFormProps {
   phone?: string;
 }
 export default function Enter() {
+  const [enter, { data, isLoading, errors }] = useMutation("/api/users/enter");
   const { register, watch, reset, handleSubmit } = useForm<IEnterFormProps>();
   const [method, setMethod] = useState<"email" | "phone">("email");
   const onEmailClick = () => {
@@ -21,14 +23,9 @@ export default function Enter() {
     setMethod("phone");
   };
   const onValid = (data: IEnterFormProps) => {
-    fetch("/api/users/enter", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
+    enter(data);
   };
+  console.log(data, isLoading, errors);
   return (
     <div className="mt-16 px-4">
       <h3 className="text-center text-3xl font-bold">Enter to Carrot</h3>
