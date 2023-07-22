@@ -21,7 +21,7 @@ export default function useMutation(url: string): UseMutationResult {
         "Content-Type": "application/json",
       },
     })
-      .then((res) => res.json())
+      .then((res) => res.json().catch(() => ({})))
       .then((data) => setState((prev) => ({ ...prev, data })))
       .catch((errors) => setState((prev) => ({ ...prev, errors })))
       .finally(() => setState((prev) => ({ ...prev, isLoading: false })));
