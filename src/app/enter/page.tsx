@@ -1,11 +1,34 @@
 "use client";
+import Button from "@/components/button";
+import Input from "@/components/input";
 import { cls } from "@/utils";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 
+interface IEnterFormProps {
+  email?: string;
+  phone?: string;
+}
 export default function Enter() {
+  const { register, watch, reset, handleSubmit } = useForm<IEnterFormProps>();
   const [method, setMethod] = useState<"email" | "phone">("email");
-  const onEmailClick = () => setMethod("email");
-  const onPhoneClick = () => setMethod("phone");
+  const onEmailClick = () => {
+    reset();
+    setMethod("email");
+  };
+  const onPhoneClick = () => {
+    reset();
+    setMethod("phone");
+  };
+  const onValid = (data: IEnterFormProps) => {
+    fetch("/api/users/enter", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+  };
   return (
     <div className="mt-16 px-4">
       <h3 className="text-center text-3xl font-bold">Enter to Carrot</h3>
@@ -37,41 +60,33 @@ export default function Enter() {
             </button>
           </div>
         </div>
-        <form className="flex flex-col">
-          <label
-            htmlFor="input"
-            className="mt-8 text-sm font-medium text-gray-700 transition-colors"
-          >
-            {method === "email" ? "Email address" : null}
-            {method === "phone" ? "Phone number" : null}
-          </label>
-          <div className="mt-1">
+        <form
+          onSubmit={handleSubmit(onValid)}
+          className="mt-8 flex flex-col space-y-4"
+        >
+          <div>
             {method === "email" ? (
-              <input
-                id="input"
-                type="email"
-                className="w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-orange-500"
-                placeholder="email"
+              <Input
+                label="Email address"
+                name="email"
+                type="text"
+                kind="text"
+                register={register("email")}
               />
             ) : null}
             {method === "phone" ? (
-              <div className="flex rounded-sm shadow-sm">
-                <span className="flex select-none items-center justify-center rounded-l-md border border-r-0 border-gray-300 bg-gray-50 px-3 text-sm text-gray-500">
-                  +82
-                </span>
-                <input
-                  id="input"
-                  type="number"
-                  className="w-full appearance-none rounded-r-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-orange-500"
-                  required
-                />
-              </div>
+              <Input
+                label="Phone number"
+                name="phone"
+                type="number"
+                kind="phone"
+                register={register("phone")}
+              />
             ) : null}
           </div>
-          <button className="mt-6 rounded-md border border-transparent bg-orange-500 px-3 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-orange-600 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
-            {method === "email" ? "Get login link" : null}
-            {method === "phone" ? "Get one-time password" : null}
-          </button>
+          <Button
+            text={method === "email" ? "Get login link" : "Get login link"}
+          />
         </form>
         <div className="mt-8">
           <div className="relative">
