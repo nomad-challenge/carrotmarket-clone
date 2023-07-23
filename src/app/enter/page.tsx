@@ -82,7 +82,13 @@ export default function Enter() {
             ) : null}
           </div>
           <Button
-            text={method === "email" ? "Get login link" : "Get login link"}
+            text={
+              isLoading
+                ? "Loading..."
+                : method === "email"
+                ? "Get login link"
+                : "Get one-time password"
+            }
           />
         </form>
         <div className="mt-8">
