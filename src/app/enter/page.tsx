@@ -10,9 +10,24 @@ interface IEnterFormProps {
   email?: string;
   phone?: string;
 }
+interface ITokenFormProps {
+  token: number;
+}
+interface IEnterMutationProps {
+  ok: boolean;
+}
 export default function Enter() {
-  const [enter, { data, isLoading, errors }] = useMutation("/api/users/enter");
+  const [enter, { data, isLoading, errors }] =
+    useMutation<IEnterMutationProps>("/api/users/enter");
+  const [
+    confirmToken,
+    { data: tokenData, isLoading: tokenIsLoading, errors: tokenErrors },
+  ] = useMutation<IEnterMutationProps>("/api/users/confirm");
+
   const { register, watch, reset, handleSubmit } = useForm<IEnterFormProps>();
+  const { register: tokenRegister, handleSubmit: tokenHandleSubmit } =
+    useForm<ITokenFormProps>();
+
   const [method, setMethod] = useState<"email" | "phone">("email");
   const onEmailClick = () => {
     reset();
@@ -25,72 +40,94 @@ export default function Enter() {
   const onValid = (data: IEnterFormProps) => {
     enter(data);
   };
-  console.log(data, isLoading, errors);
+
+  const onTokenValid = (data: ITokenFormProps) => {
+    confirmToken(data);
+  };
   return (
     <div className="mt-16 px-4">
       <h3 className="text-center text-3xl font-bold">Enter to Carrot</h3>
       <div className="mt-8">
-        <div className="flex flex-col items-center">
-          <h5 className="text-sm font-medium text-gray-500">Enter using:</h5>
-          <div className="mt-8 grid w-full grid-cols-2 gap-16 border-b">
-            <button
-              className={cls(
-                "border-b-2 pb-4 font-medium transition-colors",
-                method === "email"
-                  ? " border-orange-400  text-orange-400"
-                  : "border-b-transparent text-gray-500",
-              )}
-              onClick={onEmailClick}
+        {data?.ok ? (
+          <form
+            onSubmit={tokenHandleSubmit(onTokenValid)}
+            className="mt-8 flex flex-col space-y-4"
+          >
+            <Input
+              label="Confirmation Token"
+              name="token"
+              type="number"
+              kind="text"
+              register={tokenRegister("token")}
+            />
+
+            <Button
+              text={tokenIsLoading ? "Loading..." : "Confirm Token"}
+              isLoading={tokenIsLoading}
+            />
+          </form>
+        ) : (
+          <>
+            <div className="flex flex-col items-center">
+              <h5 className="text-sm font-medium text-gray-500">
+                Enter using:
+              </h5>
+              <div className="mt-8 grid w-full grid-cols-2 gap-16 border-b">
+                <button
+                  className={cls(
+                    "border-b-2 pb-4 font-medium transition-colors",
+                    method === "email"
+                      ? " border-orange-400  text-orange-400"
+                      : "border-b-transparent text-gray-500",
+                  )}
+                  onClick={onEmailClick}
+                >
+                  Email address
+                </button>
+                <button
+                  className={cls(
+                    "border-b-2 pb-4 font-medium transition-colors",
+                    method === "phone"
+                      ? " border-orange-400  text-orange-400"
+                      : "border-b-transparent text-gray-500",
+                  )}
+                  onClick={onPhoneClick}
+                >
+                  Phone number
+                </button>
+              </div>
+            </div>
+            <form
+              onSubmit={handleSubmit(onValid)}
+              className="mt-8 flex flex-col space-y-4"
             >
-              Email address
-            </button>
-            <button
-              className={cls(
-                "border-b-2 pb-4 font-medium transition-colors",
-                method === "phone"
-                  ? " border-orange-400  text-orange-400"
-                  : "border-b-transparent text-gray-500",
-              )}
-              onClick={onPhoneClick}
-            >
-              Phone number
-            </button>
-          </div>
-        </div>
-        <form
-          onSubmit={handleSubmit(onValid)}
-          className="mt-8 flex flex-col space-y-4"
-        >
-          <div>
-            {method === "email" ? (
-              <Input
-                label="Email address"
-                name="email"
-                type="text"
-                kind="text"
-                register={register("email")}
+              <div>
+                {method === "email" ? (
+                  <Input
+                    label="Email address"
+                    name="email"
+                    type="text"
+                    kind="text"
+                    register={register("email")}
+                  />
+                ) : null}
+                {method === "phone" ? (
+                  <Input
+                    label="Phone number"
+                    name="phone"
+                    type="number"
+                    kind="phone"
+                    register={register("phone")}
+                  />
+                ) : null}
+              </div>
+              <Button
+                text={isLoading ? "Loading..." : "Get one-time password"}
+                isLoading={isLoading}
               />
-            ) : null}
-            {method === "phone" ? (
-              <Input
-                label="Phone number"
-                name="phone"
-                type="number"
-                kind="phone"
-                register={register("phone")}
-              />
-            ) : null}
-          </div>
-          <Button
-            text={
-              isLoading
-                ? "Loading..."
-                : method === "email"
-                ? "Get login link"
-                : "Get one-time password"
-            }
-          />
-        </form>
+            </form>
+          </>
+        )}
         <div className="mt-8">
           <div className="relative">
             <div className="absolute w-full border-t border-gray-300" />
